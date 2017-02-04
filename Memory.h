@@ -7,7 +7,7 @@ class Memory
 {
 public:
 
-    //Constructor
+    //Initialize all values to 0
     Memory() {
         std::fill_n(registers, 16, 0);
         std::fill_n(memory, 1024, 0);
