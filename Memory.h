@@ -7,7 +7,7 @@ class Memory
 {
 public:
 
-    //Constructor
+    //Initialize all values to 0
     Memory() {
         std::fill_n(registers, 16, 0);
         std::fill_n(memory, 1024, 0);
@@ -37,6 +37,7 @@ public:
 private:
     unsigned long registers[16];
     unsigned long memory[1024];
+	//Might move to CPU
     unsigned long disk[2048];
 };
 
