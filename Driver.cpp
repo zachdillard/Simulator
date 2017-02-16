@@ -1,15 +1,17 @@
 #include <iostream>
 #include <string>
 #include "Loader.h"
-#include "Structs.h"
-#include <queue>
+#include "CPU.h"
+#include "Schedulers.h"
 
 
 
 int main() {
     std::string text_file;
     Memory memory;
-    std::queue new_queue;
-    Loader loader(text_file, memory, new_queue);
+    CPU cpu;
+    Long_Term long;
+    Short_Term short;
+    Loader loader(text_file, memory);
     return 0;
 }
