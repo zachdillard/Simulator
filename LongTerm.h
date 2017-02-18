@@ -1,5 +1,5 @@
-#ifndef SIMULATOR_SCHEDULERS_H
-#define SIMULATOR_SCHEDULERS_H
+#ifndef SIMULATOR_LONGTERM_H
+#define SIMULATOR_LONGTERM_H
 
 #include <queue>
 #include "Memory.h"
@@ -57,4 +57,4 @@ private:
     };
 };
 
-#endif //PROJECT_SCHEDULERS_H
+#endif //PROJECT_LONGTERM_H
