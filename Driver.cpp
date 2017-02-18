@@ -1,17 +1,26 @@
 #include <iostream>
 #include <string>
-#include "Loader.h"
 #include "CPU.h"
 #include "Schedulers.h"
+#include "ShortTerm.h"
+#include "Memory.h"
 
 
 
 int main() {
-    std::string text_file;
     Memory memory;
+    //Loader loader;
     CPU cpu;
-    Long_Term long;
-    Short_Term short;
-    Loader loader(text_file, memory);
+    ShortTerm shortTerm;
+    memory.pcbs[1] = new PCB;
+    memory.pcbs[1]->id = 1;
+    memory.pcbs[1]->diskStart = 0;
+    memory.pcbs[1]->processLength = 5;
+    for(int i = 0; i < 5; ++i)
+        memory.setDisk(i, "test");
+    LongTerm longTerm(memory, shortTerm);
+    //loader.readFromFile("programfile.txt", memory);
+    longTerm.addToRam();
+    //shortTerm.dispatch(cpu);
     return 0;
 }

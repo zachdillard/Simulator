@@ -22,8 +22,8 @@ public:
   //OR maybe create a variable called PC
   //The project specifications states that the first to registers are special purpose
   //For now let's have it has a public variable so the Short Term scheduler can access it easily
-  int PC; //Address or array index of the instruction in memory
-  std::string registers[16];
+    int PC; //Address or array index of the instruction in memory
+    std::string registers[16];
 };
 
 

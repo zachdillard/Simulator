@@ -1,27 +1,60 @@
+#ifndef SIMULATOR_SCHEDULERS_H
+#define SIMULATOR_SCHEDULERS_H
+
 #include <queue>
 #include "Memory.h"
 #include "CPU.h"
-
-#ifndef SIMULATOR_SCHEDULER_H
-#define SIMULATOR_SCHEDULER_H
-
+#include "ShortTerm.h"
 
 class LongTerm {
-//Takes in disk
-  //Put PID into ready queue
-  //Get start address of 1st process
-  //Get end address
-  //Load that into RAM
-};
-
-class ShortTerm {
-//Get top value of ready_queue
-  //Thats the PID
-  //Go to PCB that equals the PID and get the PC value of the proccess
-  //Put that value into the PC of the CPU
 public:
-  std::queue<int> ready_queue;
+    LongTerm(Memory& memory, ShortTerm& shortTerm)
+    {
+        mem = memory;
+        ss = shortTerm;
+        processCount = 1;
+        nextRAMStart = 0;
+    };
+    int getCurrentPID()
+    {
+        return processCount;
+    };
+    PCB* getCurrentProcess()
+    {
+        return mem.pcbs[getCurrentPID()];
+    };
+    int getProcessStartInDisk()
+    {
+        return getCurrentProcess()->diskStart;
+    };
+    int getProcessLength()
+    {
+        return getCurrentProcess()->processLength;
+    };
+    void addToRam()
+    {
+        getCurrentProcess()->ramStart = nextRAMStart;
+        int ramPC = getCurrentProcess()->ramStart;
+        for(int i = getProcessStartInDisk(); i < getProcessLength(); ++i)
+        {
+            mem.setRAM(ramPC, mem.getDisk(i));
+            ++ramPC;
+        }
+        nextRAMStart = getProcessLength();
+        mem.ramCount += getProcessLength();
+        addToQueue();
+    };
+    void setProcessCount(int count) {processCount = count;}
+private:
+    Memory mem;
+    ShortTerm ss;
+    int processCount;
+    int nextRAMStart;
+    void addToQueue()
+    {
+        ss.ready_queue.push(processCount);
+        ++processCount;
+    };
 };
 
-
-#endif //SIMULATOR_SCHEDULER_H
+#endif //PROJECT_SCHEDULERS_H
