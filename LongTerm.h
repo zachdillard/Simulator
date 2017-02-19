@@ -34,6 +34,7 @@ public:
     void addToRam()
     {
         getCurrentProcess()->ramStart = nextRAMStart;
+        getCurrentProcess()->pc = ramStart;
         int diskPC = getProcessStartInDisk();
         int ramPC = getCurrentProcess()->ramStart;
         for(int i = 0; i < getProcessLength(); ++i)
