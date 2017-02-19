@@ -11,10 +11,10 @@ int main() {
     CPU cpu;
     ShortTerm shortTerm;
     //Change this to the absolute location of where you're storing the program file
-    loader.readFromFile("/Users/zachdillard/Simulator/file.txt", &memory);
+    loader.readFromFile("/Users/zachdillard/School/OperatingSystems/Simulator/Simulator/programfile.txt", &memory);
     LongTerm longTerm(&memory, &shortTerm);
     while(longTerm.getProcessLength() < memory.ramSpaceLeft())
         longTerm.addToRam();
-    //shortTerm.dispatch(cpu);
+    shortTerm.dispatch(&memory, &cpu);
     return 0;
 }
