@@ -3,6 +3,7 @@
 
 #include <queue>
 #include "CPU.h"
+#include "Memory.h"
 
 class ShortTerm {
 //Get top value of ready_queue
@@ -12,7 +13,11 @@ class ShortTerm {
 public:
     ShortTerm() {};
     std::queue<int> ready_queue;
-    void dispatch(CPU* cpu);
+    void dispatch(Memory* memory, CPU* cpu)
+    {
+        cpu->PC = memory->pcbs[ready_queue.front()]->pc;
+        ready_queue.pop();
+    };
 };
 
 #endif //PROJECT_SHORTTERM_H
