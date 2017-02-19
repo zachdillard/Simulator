@@ -8,7 +8,7 @@
 
 class LongTerm {
 public:
-    LongTerm(Memory& memory, ShortTerm& shortTerm)
+    LongTerm(Memory *memory, ShortTerm *shortTerm)
     {
         mem = memory;
         ss = shortTerm;
@@ -21,7 +21,7 @@ public:
     };
     PCB* getCurrentProcess()
     {
-        return mem.pcbs[getCurrentPID()];
+        return mem->pcbs[getCurrentPID()];
     };
     int getProcessStartInDisk()
     {
@@ -34,25 +34,27 @@ public:
     void addToRam()
     {
         getCurrentProcess()->ramStart = nextRAMStart;
+        int diskPC = getProcessStartInDisk();
         int ramPC = getCurrentProcess()->ramStart;
-        for(int i = getProcessStartInDisk(); i < getProcessLength(); ++i)
+        for(int i = 0; i < getProcessLength(); ++i)
         {
-            mem.setRAM(ramPC, mem.getDisk(i));
+            mem->setRAM(ramPC, mem->getDisk(diskPC));
+            ++diskPC;
             ++ramPC;
+            mem->ramCount++;
         }
-        nextRAMStart = getProcessLength();
-        mem.ramCount += getProcessLength();
+        nextRAMStart = getCurrentProcess()->ramStart + getProcessLength();
         addToQueue();
     };
     void setProcessCount(int count) {processCount = count;}
 private:
-    Memory mem;
-    ShortTerm ss;
+    Memory* mem;
+    ShortTerm* ss;
     int processCount;
     int nextRAMStart;
     void addToQueue()
     {
-        ss.ready_queue.push(processCount);
+        ss->ready_queue.push(processCount);
         ++processCount;
     };
 };
