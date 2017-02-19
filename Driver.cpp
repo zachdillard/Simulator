@@ -3,7 +3,7 @@
 #include "LongTerm.h"
 #include "ShortTerm.h"
 #include "Memory.h"
-#include "loader.h"
+#include "Loader.h"
 
 int main() {
     Memory memory;
