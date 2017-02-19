@@ -12,7 +12,7 @@ class ShortTerm {
 public:
     ShortTerm() {};
     std::queue<int> ready_queue;
-    void dispatch(CPU& cpu);
+    void dispatch(CPU* cpu);
 };
 
 #endif //PROJECT_SHORTTERM_H
