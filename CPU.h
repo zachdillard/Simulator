@@ -9,29 +9,18 @@ using namespace std;
 
 
 class CPU {
-    //while there are instructions to fetch
-    //FETCH
-    //Go to the PC and get its value, this is the address of the instruction
-    //Go to that address and retrieve the value
-    //Give this value to DECODE
-    //Update PC by 1
-    void fetch(PCB* curPCB){
-        //No while test yet
-        //Gets value of current PC
-        PC =curPCB->pc;
-        //Gets memory value of current PC in RAM
+    string fetch() {
+        //The instruction represented by a hex value
         string memValue = mem->getRAM(PC);
-        //Updates PC by 1
-        PC += 1;
-        
-        //Sends instruction to decoder
-        decoder(memValue);
+        //Point the program counter to the next instruction
+        ++PC;
+        return memValue;
     }
     //DECODE
     //Read each bit to figure out if I/O instruction or Compute
     //Figure out the opcode
     //Give EXECUTE something to let it know which opcode/method to execute
-    void decoder(string memValue){
+    void decode(string memValue){
         //Converts hex input to binary
         stringstream ss;
         ss << hex << memValue;
