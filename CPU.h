@@ -1,26 +1,38 @@
+#ifndef SIMULATOR_CPU_H
+#define SIMULATOR_CPU_H
 #include <string>
 #include "Memory.h"
 #include <bitset>
 #include <sstream>
-#ifndef SIMULATOR_CPU_H
-#define SIMULATOR_CPU_H
+
 
 using namespace std;
 
 
 class CPU {
-    string fetch() {
-        //The instruction represented by a hex value
+    //while there are instructions to fetch
+    //FETCH
+    //Go to the PC and get its value, this is the address of the instruction
+    //Go to that address and retrieve the value
+    //Give this value to DECODE
+    //Update PC by 1
+    void fetch(PCB* curPCB){
+        //No while test yet
+        //Gets value of current PC
+        PC =curPCB->pc;
+        //Gets memory value of current PC in RAM
         string memValue = mem->getRAM(PC);
-        //Point the program counter to the next instruction
-        ++PC;
-        return memValue;
+        //Updates PC by 1
+        PC += 1;
+        
+        //Sends instruction to decoder
+        decoder(memValue);
     }
     //DECODE
     //Read each bit to figure out if I/O instruction or Compute
     //Figure out the opcode
     //Give EXECUTE something to let it know which opcode/method to execute
-    void decode(string memValue){
+    void decoder(string memValue){
         //Converts hex input to binary
         stringstream ss;
         ss << hex << memValue;
@@ -113,7 +125,9 @@ public:
         int sReg2;
         int dReg;
     }
-    
+	
+    //Read
+	//Reads the content of I/P buffer into an accumulator
     void RD(int reg1, int reg2, int address)
     {
         if(reg2 == 0)
@@ -121,11 +135,133 @@ public:
         else
             registers[reg1] = registers[reg2];
     }
-    void WR(){};
+	//write - Brett
+	//Don't think this is right. Same as RD?
+    void WR(int reg1, int reg2, int address)
+	{
+		if(reg2 == 0)
+            registers[reg1] = mem->getRAM(address);
+        else
+            registers[reg1] = registers[reg2];
+	}
+	
+	//store
+	//stores the content of a register into an address
+	void ST(int reg1, int address)
+	{
+		mem->getRam(address) = registers[reg1];
+	}
+	
+	//load
+	//loads the content of an address into a register
+	void LW(int reg1, int address) 
+	{
+		registers[reg1] = mem->getRam(address);
+	}
+	
+	//move
+	//transfers the content of one register into another
+	void MOV(int reg1, int reg2) 
+	{
+		registers[reg1] = registers[reg2];
+	}
+	
+	//add
+	//Adds the content of two S-regs into a D-reg
+	void ADD(int sreg1, int sreg2, int dreg) 
+	{
+		registers[dreg] = registers[sreg1] + registers[sreg2];
+	}
+	
+	//subtract
+	// Subtracts content of two S-regs into D-reg
+	void SUB(int sreg1, int sreg2, int dreg) 
+	{
+		registers[dreg] = registers[sreg1] - registers[sreg2];
+	}
+	
+	//multiply
+	// Mutiplies content of two S-regs into D-reg
+	void MUL(int sreg1, int sreg2, int dreg) 
+	{
+		registers[dreg] = registers[sreg1] * registers[sreg2];
+	}
+	
+	//divide
+	//Divides content of two S-regs into D-reg
+	void DIV(int sreg1, int sreg2, int dreg) 
+	{
+		registers[dreg] = (registers[sreg1] / registers[sreg2]);
+	}
+	
+	//and gate
+	//Logical AND of two S-regs into D-reg
+	void AND(int sreg1, int sreg2, int dreg) 
+	{
+		if(registers[sreg1] == registers[sreg2])
+			registers[dreg] = 1;
+		else
+			registers[dreg] = 0;
+	}
+	
+	//or gate
+	//Logical OR of two S-regs into D-reg
+	void OR(int sreg1, int sreg2, int dreg) 
+	{
+		if(registers[sreg1] == 0 && registers[sreg2] == 0)
+			registers[dreg] = 0;
+		else
+			registers[dreg] = 1;
+	}
+	
+	//MOVI
+	//Transfers addresses directly into a register
+	void MOVIaddress(int reg, int address) 
+	{
+		mem->getRam(address) = registers[reg2];
+		
+	}
+	
+	//MOVIregister
+	//Transfers data directly into a register
+	void MOVIregister(int reg1, int reg2) 
+	{
+		registers[reg1] = registers[reg2];
+	}
+	
+	//ADDI
+	//Adds a data value directly to the content of a register
+	void ADDI(int reg1, int reg2)
+	{
+		registers[reg2] += registers[reg1];
+	}
+	
+	//MULI
+	//Multiplies a data value directly with the content of a register
+	void MULI(int reg1, int reg2)
+	{
+		registers[reg2] *= registers[reg1];
+	}
+	
+	//MULI
+	//Divides a data value directly to the content of a register
+	void DIVI(int reg1, int reg2)
+	{
+		registers[reg2] /= registers[reg1];
+	}
+	
+	//LDI
+	//Loads a data/address directly to the content of a register
+	void LDI(int reg1, int reg2, int address) 
+	{
+		
+	}
+	
     int PC; //Address or array index of the instruction in memory
     std::string registers[16];
 private:
     Memory* mem;
+};
 };
 
 
