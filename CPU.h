@@ -16,17 +16,12 @@ class CPU {
     //Go to that address and retrieve the value
     //Give this value to DECODE
     //Update PC by 1
-    void fetch(PCB* curPCB){
-        //No while test yet
-        //Gets value of current PC
-        PC =curPCB->pc;
+    string fetch(){
         //Gets memory value of current PC in RAM
         string memValue = mem->getRAM(PC);
         //Updates PC by 1
-        PC += 1;
-        
-        //Sends instruction to decoder
-        decoder(memValue);
+        ++PC;
+	return memValue;
     }
     //DECODE
     //Read each bit to figure out if I/O instruction or Compute
