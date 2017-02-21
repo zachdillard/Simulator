@@ -223,48 +223,52 @@ public:
 	
 	//MOVI
 	//Transfers addresses directly into a register
-	void MOVIaddress(int reg, int address) 
+	void MOVI(int breg, int dreg, int address) 
 	{
-		mem->setRam(address,registers[reg]);
-		
-	}
-	
-	//MOVIregister
-	//Transfers data directly into a register
-	void MOVIregister(int reg1, int reg2) 
-	{
-		registers[reg1] = registers[reg2];
+		if(dreg == 0) 
+			mem->setRam(EffAddress(breg, address), registers[dreg]);
+		else
+			registers[breg] = registers[dreg];
 	}
 	
 	//ADDI
 	//Adds a data value directly to the content of a register
-	void ADDI(int reg1, int reg2)
+	void ADDI(int breg, int dreg, int address)
 	{
-		registers[reg2] += registers[reg1];
+		if(dreg == 0)
+			mem->setRam(EffAddress(breg, address), (registers[dreg] += registers[breg]));
+		else
+			registers[dreg] += registers[breg];
 	}
 	
 	//MULI
 	//Multiplies a data value directly with the content of a register
-	void MULI(int reg1, int reg2)
+	void MULI(int breg, int dreg, int address)
 	{
-		registers[reg2] *= registers[reg1];
+		if(dreg == 0)
+			mem->setRam(EffAddress(breg, address), (registers[dreg] *= registers[breg]));
+		else
+			registers[dreg] *= registers[breg];
 	}
 	
-	//MULI
+	//DIVI
 	//Divides a data value directly to the content of a register
-	void DIVI(int reg1, int reg2)
+	void DIVI(int breg, int dreg, int address)
 	{
-		registers[reg2] /= registers[reg1];
+		if(dreg == 0)
+			mem->setRam(EffAddress(breg, address), (registers[dreg] /= registers[breg]));
+		else
+			registers[dreg] /= registers[breg];
 	}
 	
 	//LDI
 	//Loads a data/address directly to the content of a register
-	void LDI(int reg1, int reg2, int address) 
+	void LDI(int breg, int dreg, int address) 
 	{
-		if(reg2 == 0) 
-			registers[reg1] = mem->getRam(address);
+		if(dreg == 0) 
+			mem->setRam(EffAddress(breg, address), registers[dreg]);
 		else
-			registers[reg1] = registers[reg2];
+			registers[dreg] = registers[breg];
 	}
 	
 	//SLT
@@ -279,7 +283,7 @@ public:
 	
 	//SLTI
 	//Sets the D-reg to 1 if first S-reg is less than a piece of data; 0 otherwise
-	void SLTI(int sreg, int dreg, int value) 
+	void SLTI(int sreg, int dreg, int value, int address) 
 	{
 		if(sreg < value)
 			registers[dreg] = 1;
@@ -289,83 +293,120 @@ public:
 	
 	//HLT
 	//Logical end of Program
-	int HLT() 
+	void HLT() 
 	{
-		return 0;
+		
 	}
 	
 	//NOP
 	//Does nothing and moves to next instruction
-	string NOP(int last_instruction) 
+	void NOP() 
 	{
-		return mem->getRam(last_instruction++);
+		;
 	}
 	
 	//JMP
 	//Jumps to a specified locaiton
-	string JMP(int location)
+	void JMP(int address)
 	{
-		return mem->getRam(location);
+		PC = mem->getRam(address);
 	}
 	
 	//BEQ
 	//Branches to an address when content of B-reg = D-reg
-	string BEQ(int address, int breg, int dreg) 
+	void BEQ(int breg, int dreg, int address) 
 	{
 		if(breg == dreg) 
-			return mem->getRam(address);
+		{
+			if(dreg == 0) 
+				PC = EffAddress(breg, address);
+			else 
+				PC = address;
+		}
 		else
 			;
 	}
 	
 	//BNE
 	//Branches to an address when content of B-reg != D-reg
-	string BNE(int address, int breg, int dreg) 
+	void BNE(int breg, int dreg, int address) 
 	{
 		if(breg != dreg) 
-			return mem->getRam(address);
+		{
+			if(dreg == 0) 
+				PC = EffAddress(breg, address);
+			else 
+				PC = address;
+		}
 		else 
 			;
 	}
 	
 	//BEZ
 	//Branches to an address when content of B-reg = 0
-	string BEZ(int address, int breg) 
+	void BEZ(int breg, int dreg, int address) 
 	{
 		if(breg == 0) 
-			return mem->getRam(address);
-		else
+		{
+			if(dreg == 0) 
+				PC = EffAddress(breg, address);
+			else 
+				PC = address;
+		}
+		else 
 			;
 	}
 	
 	//BNZ
 	//Branches to an address whne content of B-reg != 0
-	string BNZ(int address, int breg) 
+	void BNZ(int breg, int dreg, int address) 
 	{
-		if(breg != 0) 
-			return mem->getRam(address);
+		if(breg != 0)
+		{
+			if(dreg == 0) 
+				PC = EffAddress(breg, address);
+			else 
+				PC = address;
+		}
 		else
 			;
 	}
 	
 	//BGZ
 	//Branches to an address when content of B-reg > 0
-	string BGZ(int address, int breg) 
+	void BGZ(int breg, int dreg, int address) 
 	{
-		if(breg > 0) 
-			return mem->getRam(address);
+		if(breg > 0)
+		{
+			if(dreg == 0) 
+				PC = EffAddress(breg, address);
+			else 
+				PC = address;
+		}
 		else
 			;
 	}
 	
 	//BLZ
 	//Branches to an address when content of B-reg < 0
-	string BLZ(int address, int breg) 
+	void BLZ(int breg, int dreg, int address) 
 	{
 		if(breg < 0) 
-			return mem-getRam(address);
+		{
+			if(dreg == 0) 
+				PC = EffAddress(breg, address);
+			else 
+				PC = address;
+		}
 		else
 			;
+	}
+	
+	//effective address
+	//takes int value and address
+	int EffAddress(int offset, int address) 
+	{
+		return offset + address;
 	}
     int PC; //Address or array index of the instruction in memory
     std::string registers[16];
