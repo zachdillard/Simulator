@@ -10,11 +10,9 @@ using namespace std;
 
 
 class CPU {
-    //while there are instructions to fetch
     //FETCH
     //Go to the PC and get its value, this is the address of the instruction
     //Go to that address and retrieve the value
-    //Give this value to DECODE
     //Update PC by 1
     void fetch(){
         //Gets memory value of current PC in RAM
@@ -26,7 +24,6 @@ class CPU {
     //DECODE
     //Read each bit to figure out if I/O instruction or Compute
     //Figure out the opcode
-    //Give EXECUTE something to let it know which opcode/method to execute
     void decoder(string memValue){
         //Converts hex input to binary
         stringstream ss;
