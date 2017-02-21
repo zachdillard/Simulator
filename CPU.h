@@ -16,12 +16,17 @@ class CPU {
     //Go to that address and retrieve the value
     //Give this value to DECODE
     //Update PC by 1
-    string fetch(){
+    void fetch(PCB* curPCB){
+        //No while test yet
+        //Gets value of current PC
+        PC =curPCB->pc;
         //Gets memory value of current PC in RAM
         string memValue = mem->getRAM(PC);
         //Updates PC by 1
-        ++PC;
-	return memValue;
+        PC += 1;
+        
+        //Sends instruction to decoder
+        decoder(memValue);
     }
     //DECODE
     //Read each bit to figure out if I/O instruction or Compute
@@ -102,11 +107,17 @@ public:
                 RD(reg1, reg2, address);
             case 1:
                 WR(reg1, reg2, address);
+			case 2:
+				ST(reg1, address);
+			case 3: 
+				LW(reg1, address);
         }
     }
     void UnconditionalJump(string statement)
     {
-        int addresss;
+        int address;
+		
+		
     }
     void ConditionalBranch(string statement)
     {
@@ -130,7 +141,8 @@ public:
         else
             registers[reg1] = registers[reg2];
     }
-	//write - Brett
+	//write 
+	//Writes the content of accumulator into O/P buffer
 	//Don't think this is right. Same as RD?
     void WR(int reg1, int reg2, int address)
 	{
@@ -144,7 +156,7 @@ public:
 	//stores the content of a register into an address
 	void ST(int reg1, int address)
 	{
-		mem->getRam(address) = registers[reg1];
+		mem->setRam(address, registers[reg1]);
 	}
 	
 	//load
@@ -213,7 +225,7 @@ public:
 	//Transfers addresses directly into a register
 	void MOVIaddress(int reg, int address) 
 	{
-		mem->getRam(address) = registers[reg2];
+		mem->setRam(address,registers[reg]);
 		
 	}
 	
@@ -249,9 +261,112 @@ public:
 	//Loads a data/address directly to the content of a register
 	void LDI(int reg1, int reg2, int address) 
 	{
-		
+		if(reg2 == 0) 
+			registers[reg1] = mem->getRam(address);
+		else
+			registers[reg1] = registers[reg2];
 	}
 	
+	//SLT
+	//Sets the D-reg to 1 if first S-reg is less than the B-reg; 0 otherwise
+	void SLT(int sreg, int dreg, int breg) 
+	{
+		if(sreg < breg)
+			registers[dreg] = 1;
+		else
+			registers[dreg] = 0;
+	}
+	
+	//SLTI
+	//Sets the D-reg to 1 if first S-reg is less than a piece of data; 0 otherwise
+	void SLTI(int sreg, int dreg, int value) 
+	{
+		if(sreg < value)
+			registers[dreg] = 1;
+		else
+			registers[dreg] = 0;
+	}
+	
+	//HLT
+	//Logical end of Program
+	int HLT() 
+	{
+		return 0;
+	}
+	
+	//NOP
+	//Does nothing and moves to next instruction
+	string NOP(int last_instruction) 
+	{
+		return mem->getRam(last_instruction++);
+	}
+	
+	//JMP
+	//Jumps to a specified locaiton
+	string JMP(int location)
+	{
+		return mem->getRam(location);
+	}
+	
+	//BEQ
+	//Branches to an address when content of B-reg = D-reg
+	string BEQ(int address, int breg, int dreg) 
+	{
+		if(breg == dreg) 
+			return mem->getRam(address);
+		else
+			;
+	}
+	
+	//BNE
+	//Branches to an address when content of B-reg != D-reg
+	string BNE(int address, int breg, int dreg) 
+	{
+		if(breg != dreg) 
+			return mem->getRam(address);
+		else 
+			;
+	}
+	
+	//BEZ
+	//Branches to an address when content of B-reg = 0
+	string BEZ(int address, int breg) 
+	{
+		if(breg == 0) 
+			return mem->getRam(address);
+		else
+			;
+	}
+	
+	//BNZ
+	//Branches to an address whne content of B-reg != 0
+	string BNZ(int address, int breg) 
+	{
+		if(breg != 0) 
+			return mem->getRam(address);
+		else
+			;
+	}
+	
+	//BGZ
+	//Branches to an address when content of B-reg > 0
+	string BGZ(int address, int breg) 
+	{
+		if(breg > 0) 
+			return mem->getRam(address);
+		else
+			;
+	}
+	
+	//BLZ
+	//Branches to an address when content of B-reg < 0
+	string BLZ(int address, int breg) 
+	{
+		if(breg < 0) 
+			return mem-getRam(address);
+		else
+			;
+	}
     int PC; //Address or array index of the instruction in memory
     std::string registers[16];
 private:
