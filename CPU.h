@@ -15,9 +15,7 @@ class CPU {
     //Go to that address and retrieve the value
     //Update PC by 1
     void fetch(){
-        //Gets memory value of current PC in RAM
         string memValue = mem->getRAM(PC);
-        //Updates PC by 1
         ++PC;
 	return memValue;
     }
