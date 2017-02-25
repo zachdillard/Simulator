@@ -48,11 +48,11 @@ public:
                 lengthOfJob = std::stoul(infoArray[3], nullptr, 16);
                 PCBpriority = std::stoul(infoArray[4], nullptr, 16);
 
-                memory->pcbs[PCBcount] = new PCB;
-                memory->pcbs[PCBcount]->id = ID;
-                memory->pcbs[PCBcount]->size = lengthOfJob;
-                memory->pcbs[PCBcount]->priority = PCBpriority;
-                memory->pcbs[PCBcount]->diskStart = diskCount;
+                memory->pcbs[ID] = new PCB;
+                memory->pcbs[ID]->id = ID;
+                memory->pcbs[ID]->size = lengthOfJob;
+                memory->pcbs[ID]->priority = PCBpriority;
+                memory->pcbs[ID]->diskStart = diskCount;
                 PCBcount++;
                 
             }
@@ -60,7 +60,7 @@ public:
             {
                 std::istringstream instructData(line);
                 std::string instructTemp = line.substr(0, 10);
-                memory->setDisk(diskCount, instructTemp);
+                memory->setDisk(diskCount, std::stoul(instructTemp, nullptr, 16));
                 diskCount++;
             }
 
@@ -91,6 +91,7 @@ public:
                 
             }
         }
+        memory->JobCount = PCBcount - 1;
     }
 };
 

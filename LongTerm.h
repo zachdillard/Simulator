@@ -13,7 +13,6 @@ public:
         mem = memory;
         ss = shortTerm;
         processCount = 1;
-        nextRAMStart = 0;
     };
     int getCurrentPID()
     {
@@ -41,13 +40,14 @@ public:
         {
             mem->setRAM(ramPC, mem->getDisk(diskPC));
             ++diskPC;
-            ++ramPC;
-            mem->ramCount++;
+            ramPC += 4;
+            mem->ramCount += 4;
         }
-        nextRAMStart = getCurrentProcess()->ramStart + getProcessLength();
+        nextRAMStart = getCurrentProcess()->ramStart + (getProcessLength() * 4);
         addToQueue();
     };
-    void setProcessCount(int count) {processCount = count;}
+    void setNextRamStart(int index) {nextRAMStart = index;}
+    int getProcessCount() {return processCount;}
 private:
     Memory* mem;
     ShortTerm* ss;

@@ -10,25 +10,22 @@ using namespace std;
 
 
 class CPU {
+public:
     //FETCH
     //Go to the PC and get its value, this is the address of the instruction
     //Go to that address and retrieve the value
     //Update PC by 1
-    void fetch(){
-        string memValue = mem->getRAM(PC);
-        ++PC;
+    unsigned int fetch(){
+        unsigned int memValue = mem->getRAM(PC);
+        PC += 4;
 	return memValue;
     }
     //DECODE
     //Read each bit to figure out if I/O instruction or Compute
     //Figure out the opcode
-    void decoder(string memValue){
+    void decoder(unsigned int memValue){
         //Converts hex input to binary
-        stringstream ss;
-        ss << hex << memValue;
-        unsigned placeHolder;
-        ss >> placeHolder;
-        bitset<32> ourValue(placeHolder);
+        bitset<32> ourValue(memValue);
         string decodedValue = ourValue.to_string();
         
         //Gets our OPCODE and instruction format
@@ -38,10 +35,11 @@ class CPU {
         execute(instructionType, opcode, decodedValue);
     }
     
+    
     //PRECONDITION: The input must be a binary number in a string value
     //POSTCONDITION: Outputs a 6-bit opcode
     string getOpCode(string decodedValue){
-        return decodedValue.substr(2,8);
+        return decodedValue.substr(2,6);
     }
     //PRECONDITION: The input must be a binary number in a string value
     //POSTCONDITION: Outputs 2 bits that represents the instruction type to use
@@ -64,20 +62,23 @@ class CPU {
             case 2:
                 break;
             case 3:
-                IOformat(statement)
+                IOformat(statement);
                 break;
         }
     }
-public:
     //One of these registers could be the Program Counter
     //OR maybe create a variable called PC
     //The project specifications states that the first to registers are special purpose
     //For now let's have it has a public variable so the Short Term scheduler can access it easily
+    
+    
+    
     CPU(Memory* memory)
     {
         mem = memory;
-        registers[1] = "0x0";
+        fill_n(registers, 16, 0);
     }
+    
     void IOformat(string statement)
     {
         int reg1;
@@ -86,9 +87,9 @@ public:
         int opcode;
         
         opcode = stoul(getOpCode(statement), nullptr, 2);
-        reg1 = stoul(statement.substr(8, 12), nullptr, 2);
-        reg2 = stoul(statement.substr(12, 16), nullptr, 2);
-        address = stoul(statement.substr(16, 32), nullptr, 2);
+        reg1 = stoul(statement.substr(8, 4), nullptr, 2);
+        reg2 = stoul(statement.substr(12, 4), nullptr, 2);
+        address = stoul(statement.substr(16, 16), nullptr, 2);
         
         
         switch(opcode)
@@ -146,14 +147,14 @@ public:
 	//stores the content of a register into an address
 	void ST(int reg1, int address)
 	{
-		mem->setRam(address, registers[reg1]);
+		mem->setRAM(address, registers[reg1]);
 	}
 	
 	//load
 	//loads the content of an address into a register
 	void LW(int reg1, int address) 
 	{
-		registers[reg1] = mem->getRam(address);
+		registers[reg1] = mem->getRAM(address);
 	}
 	
 	//move
@@ -216,7 +217,7 @@ public:
 	void MOVI(int breg, int dreg, int address) 
 	{
 		if(dreg == 0) 
-			mem->setRam(EffAddress(breg, address), registers[dreg]);
+			mem->setRAM(EffAddress(breg, address), registers[dreg]);
 		else
 			registers[breg] = registers[dreg];
 	}
@@ -226,7 +227,7 @@ public:
 	void ADDI(int breg, int dreg, int address)
 	{
 		if(dreg == 0)
-			mem->setRam(EffAddress(breg, address), (registers[dreg] += registers[breg]));
+			mem->setRAM(EffAddress(breg, address), (registers[dreg] += registers[breg]));
 		else
 			registers[dreg] += registers[breg];
 	}
@@ -236,7 +237,7 @@ public:
 	void MULI(int breg, int dreg, int address)
 	{
 		if(dreg == 0)
-			mem->setRam(EffAddress(breg, address), (registers[dreg] *= registers[breg]));
+			mem->setRAM(EffAddress(breg, address), (registers[dreg] *= registers[breg]));
 		else
 			registers[dreg] *= registers[breg];
 	}
@@ -246,7 +247,7 @@ public:
 	void DIVI(int breg, int dreg, int address)
 	{
 		if(dreg == 0)
-			mem->setRam(EffAddress(breg, address), (registers[dreg] /= registers[breg]));
+			mem->setRAM(EffAddress(breg, address), (registers[dreg] /= registers[breg]));
 		else
 			registers[dreg] /= registers[breg];
 	}
@@ -256,7 +257,7 @@ public:
 	void LDI(int breg, int dreg, int address) 
 	{
 		if(dreg == 0) 
-			mem->setRam(EffAddress(breg, address), registers[dreg]);
+			mem->setRAM(EffAddress(breg, address), registers[dreg]);
 		else
 			registers[dreg] = registers[breg];
 	}
@@ -299,7 +300,7 @@ public:
 	//Jumps to a specified locaiton
 	void JMP(int address)
 	{
-		PC = mem->getRam(address);
+		PC = mem->getRAM(address);
 	}
 	
 	//BEQ
@@ -398,11 +399,11 @@ public:
 	{
 		return offset + address;
 	}
+     
     int PC; //Address or array index of the instruction in memory
-    std::string registers[16];
+    unsigned int registers[16];
 private:
     Memory* mem;
-};
 };
 
 

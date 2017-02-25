@@ -2,40 +2,48 @@
 #define SIMULATOR_MEMORY_H
 
 #include <string>
+#include <iostream>
+#include <fstream>
 
 struct PCB {
-    int id;         //process ID
-    int size;   //Number of instructions
-    int pc;         //program counter
-    int diskStart;
-    int ramStart;
-    int priority;
-    int status;     //new, ready, waiting, etc.
-    int buff_in;    //start address of input buffer
-    int buff_out;   //start address of output buffer
-    int buff_temp;  //start address of temporary buffer
-    int processLength; //Total size of process including data/buffers
-    int cpuID;
+    int id = 0;         //process ID
+    int size = 0;   //Number of instructions
+    int pc = 0;         //program counter
+    int diskStart = 0;
+    int ramStart = 0;
+    int priority = 0;
+    int status = 0;     //new, ready, waiting, etc.
+    int buff_in = 0;    //size of input buffer
+    int buff_out = 0;   //size of output buffer
+    int buff_temp = 0;  //size of temporary buffer
+    int processLength = 0; //Total size of process including data/buffers
+    int cpuID = 0;
 };
 
 class Memory 
 {
 public:
+    Memory()
+    {
+        std::fill_n(ram, 4096, 0);
+        std::fill_n(disk, 2048, 0);
+    }
 	PCB* pcbs[40];
-    int ramCount;
-	void setRAM(int address, std::string value)
+    int ramCount = 0;
+    int JobCount = 0;
+	void setRAM(int address, unsigned int value)
     {
         ram[address] = value;
     };
-	void setDisk(int address, std::string value)
+	void setDisk(int address, unsigned int value)
     {
         disk[address] = value;
     };
-	std::string getRAM(int address)
+	unsigned int getRAM(int address)
     {
         return ram[address];
     };
-	std::string getDisk(int address)
+	unsigned int getDisk(int address)
     {
         return disk[address];
     };
@@ -45,11 +53,28 @@ public:
     }
     int ramSpaceLeft()
     {
-        return 1024 - ramCount;
+        return 4096 - ramCount;
+    }
+    void coreDump()
+    {
+        //DONT USE CAUSES MEMORY LEAKS
+        std::ofstream file;
+        file.open("/Users/zachdillard/School/OperatingSystems/Simulator/Simulator/coredump.txt", std::ios_base::app);
+        for(std::size_t i = 0; i < 1024; ++i)
+        {
+            file << "Address " << i << ":" << ram[i] << "\n";
+        }
+        file.close();
+    }
+    void clearRam()
+    {
+        for(std::size_t i = 0; i < 1024; ++i)
+            ram[i] = 0;
+        ramCount = 0;
     }
 private:
-	std::string disk[2048];
-	std::string ram[1024];
+	unsigned int disk[2048];
+	unsigned int ram[4096];
 };
 
 #endif //PROJECT_MEMORY_H
