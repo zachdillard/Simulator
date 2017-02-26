@@ -24,6 +24,8 @@ int main() {
             shortTerm.dispatch(&memory, &cpu);
             do cpu.decoder(cpu.fetch());
             while(cpu.PC != 0);
+            //Change the location of file path
+            memory.coreDump();
         }
         memory.clearRam();
     }
