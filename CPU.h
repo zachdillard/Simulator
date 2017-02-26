@@ -55,13 +55,16 @@ public:
         int oc = stoul(opcode, nullptr, 2);
         switch(msb)
         {
-            case 0:
+            case 0x00:
+                ArithmeticFormat(statement);
                 break;
-            case 1:
+            case 0x1:
+                ConditionalBranch(statement);
                 break;
-            case 2:
+            case 0x2:
+                UnconditionalJump(statement);
                 break;
-            case 3:
+            case 0x3:
                 IOformat(statement);
                 break;
         }
@@ -94,33 +97,110 @@ public:
         
         switch(opcode)
         {
-            case 0:
+            case 0x0:
                 RD(reg1, reg2, address);
-            case 1:
+            case 0x1:
                 WR(reg1, reg2, address);
-			case 2:
-				ST(reg1, address);
-			case 3: 
-				LW(reg1, address);
         }
     }
     void UnconditionalJump(string statement)
     {
-        int address;
-		
-		
+        int opcode = stoul(getOpCode(statement), nullptr, 2);
+        int address = stoul(statement.substr(16,16), nullptr, 2);
+        
+        switch(opcode)
+        {
+            case 0x12:
+                HLT();
+                break;
+            case 0x14:
+                JMP(address);
+                break;
+        }
     }
     void ConditionalBranch(string statement)
     {
-        int bReg;
-        int dReg;
-        int address;
+        int breg = stoul(statement.substr(8, 4), nullptr, 2);
+        int dreg = stoul(statement.substr(12, 4), nullptr, 2);
+        int address = stoul(statement.substr(16, 16), nullptr, 2);
+        int opcode = stoul(getOpCode(statement), nullptr, 2);
+        
+        switch (opcode) {
+            case 0x02:
+                ST(breg, dreg, address);
+                break;
+            case 0x03:
+                LW(breg, dreg, address);
+                break;
+            case 0x0b:
+                MOVI(breg, dreg, address);
+                break;
+            case 0x0c:
+                ADDI(breg, dreg, address);
+                break;
+            case 0x0d:
+                MULI(breg, dreg, address);
+                break;
+            case 0x0f:
+                LDI(breg, dreg, address);
+                break;
+            case 0x11:
+                SLTI(breg, dreg, address);
+                break;
+            case 0x15:
+                BEQ(breg, dreg, address);
+                break;
+            case 0x16:
+                BNE(breg, dreg, address);
+                break;
+            case 0x17:
+                BEZ(breg, dreg, address);
+                break;
+            case 0x18:
+                BNZ(breg, dreg, address);
+                break;
+            case 0x19:
+                BGZ(breg, dreg, address);
+                break;
+            case 0x1a:
+                BLZ(breg, dreg, address);
+                break;
+        }
     }
     void ArithmeticFormat(string statement)
     {
-        int sReg1;
-        int sReg2;
-        int dReg;
+        int sreg1 = stoul(statement.substr(8, 4), nullptr, 2);
+        int sreg2 = stoul(statement.substr(12, 4), nullptr, 2);
+        int dreg = stoul(statement.substr(16, 4), nullptr, 2);
+        int opcode = stoul(getOpCode(statement), nullptr, 2);
+        
+        switch(opcode)
+        {
+            case 0x04:
+                MOV(sreg1, sreg2, dreg);
+                break;
+            case 0x05:
+                ADD(sreg1, sreg2, dreg);
+                break;
+            case 0x06:
+                SUB(sreg1, sreg2, dreg);
+                break;
+            case 0x07:
+                MUL(sreg1, sreg2, dreg);
+                break;
+            case 0x08:
+                DIV(sreg1, sreg2, dreg);
+                break;
+            case 0x09:
+                AND(sreg1, sreg2, dreg);
+                break;
+            case 0x0a:
+                OR(sreg1, sreg2, dreg);
+                break;
+            case 0x10:
+                SLT(sreg1, sreg2, dreg);
+                break;
+        }
     }
 	
     //Read
@@ -130,38 +210,37 @@ public:
         if(reg2 == 0)
             registers[reg1] = mem->getRAM(address);
         else
-            registers[reg1] = registers[reg2];
+            registers[reg1] = mem->getRAM(registers[reg2]);
     }
 	//write 
 	//Writes the content of accumulator into O/P buffer
-	//Don't think this is right. Same as RD?
     void WR(int reg1, int reg2, int address)
 	{
 		if(reg2 == 0)
-            registers[reg1] = mem->getRAM(address);
+            mem->setRAM(address, registers[reg1]);
         else
-            registers[reg1] = registers[reg2];
+            mem->setRAM(registers[reg2], registers[reg1]);
 	}
 	
 	//store
 	//stores the content of a register into an address
-	void ST(int reg1, int address)
+	void ST(int breg, int dreg, int address)
 	{
-		mem->setRAM(address, registers[reg1]);
+        mem->setRAM(registers[dreg] + address, registers[breg]);
 	}
 	
 	//load
 	//loads the content of an address into a register
-	void LW(int reg1, int address) 
+	void LW(int breg, int dreg, int address)
 	{
-		registers[reg1] = mem->getRAM(address);
+        registers[dreg] = mem->getRAM(registers[breg] + address);
 	}
 	
 	//move
 	//transfers the content of one register into another
-	void MOV(int reg1, int reg2) 
+	void MOV(int sreg1, int sreg2, int dreg)
 	{
-		registers[reg1] = registers[reg2];
+        registers[dreg] = registers[sreg2];
 	}
 	
 	//add
@@ -192,81 +271,73 @@ public:
 		registers[dreg] = (registers[sreg1] / registers[sreg2]);
 	}
 	
-	//and gate
 	//Logical AND of two S-regs into D-reg
 	void AND(int sreg1, int sreg2, int dreg) 
 	{
-		if(registers[sreg1] == registers[sreg2])
-			registers[dreg] = 1;
-		else
-			registers[dreg] = 0;
+        registers[dreg] = registers[sreg1] & registers[sreg2];
 	}
 	
-	//or gate
 	//Logical OR of two S-regs into D-reg
 	void OR(int sreg1, int sreg2, int dreg) 
 	{
-		if(registers[sreg1] == 0 && registers[sreg2] == 0)
-			registers[dreg] = 0;
-		else
-			registers[dreg] = 1;
+        registers[dreg] = registers[sreg1] | registers[sreg2];
 	}
 	
 	//MOVI
 	//Transfers addresses directly into a register
 	void MOVI(int breg, int dreg, int address) 
 	{
-		if(dreg == 0) 
-			mem->setRAM(EffAddress(breg, address), registers[dreg]);
+		if(breg == 0)
+            registers[dreg] = address;
 		else
-			registers[breg] = registers[dreg];
+            registers[dreg] = mem->getRAM(registers[breg] + address);
 	}
 	
 	//ADDI
 	//Adds a data value directly to the content of a register
 	void ADDI(int breg, int dreg, int address)
 	{
-		if(dreg == 0)
-			mem->setRAM(EffAddress(breg, address), (registers[dreg] += registers[breg]));
+		if(breg == 0)
+            registers[dreg] += address;
 		else
-			registers[dreg] += registers[breg];
+            registers[dreg] += mem->getRAM(registers[breg] + address);
 	}
 	
 	//MULI
 	//Multiplies a data value directly with the content of a register
 	void MULI(int breg, int dreg, int address)
 	{
-		if(dreg == 0)
-			mem->setRAM(EffAddress(breg, address), (registers[dreg] *= registers[breg]));
-		else
-			registers[dreg] *= registers[breg];
-	}
+        if(breg == 0)
+            registers[dreg] *= address;
+        else
+            registers[dreg] *= mem->getRAM(registers[breg] + address);
+    }
 	
 	//DIVI
 	//Divides a data value directly to the content of a register
 	void DIVI(int breg, int dreg, int address)
 	{
-		if(dreg == 0)
-			mem->setRAM(EffAddress(breg, address), (registers[dreg] /= registers[breg]));
-		else
-			registers[dreg] /= registers[breg];
+        if(breg == 0)
+            registers[dreg] /= address;
+        else
+            registers[dreg] /= mem->getRAM(registers[breg] + address);
 	}
 	
 	//LDI
 	//Loads a data/address directly to the content of a register
 	void LDI(int breg, int dreg, int address) 
 	{
-		if(dreg == 0) 
-			mem->setRAM(EffAddress(breg, address), registers[dreg]);
-		else
-			registers[dreg] = registers[breg];
+		if(breg == 0)
+            registers[dreg] = address;
+        else
+            registers[dreg] = mem->getRAM(registers[breg] + address);
 	}
 	
 	//SLT
 	//Sets the D-reg to 1 if first S-reg is less than the B-reg; 0 otherwise
-	void SLT(int sreg, int dreg, int breg) 
+	void SLT(int sreg1, int sreg2, int dreg)
 	{
-		if(sreg < breg)
+		if(registers[sreg1] < registers[sreg2])
 			registers[dreg] = 1;
 		else
 			registers[dreg] = 0;
@@ -274,19 +345,19 @@ public:
 	
 	//SLTI
 	//Sets the D-reg to 1 if first S-reg is less than a piece of data; 0 otherwise
-	void SLTI(int sreg, int dreg, int value, int address) 
+	void SLTI(int breg, int dreg, int address)
 	{
-		if(sreg < value)
-			registers[dreg] = 1;
-		else
-			registers[dreg] = 0;
+		if(registers[breg] < address)
+            registers[dreg] = 1;
+        else
+            registers[dreg] = 0;
 	}
 	
 	//HLT
 	//Logical end of Program
 	void HLT() 
 	{
-		
+        PC = 0;
 	}
 	
 	//NOP
@@ -307,90 +378,48 @@ public:
 	//Branches to an address when content of B-reg = D-reg
 	void BEQ(int breg, int dreg, int address) 
 	{
-		if(breg == dreg) 
-		{
-			if(dreg == 0) 
-				PC = EffAddress(breg, address);
-			else 
-				PC = address;
-		}
-		else
-			;
+		if(registers[breg] == registers[dreg])
+            PC = address;
 	}
 	
 	//BNE
 	//Branches to an address when content of B-reg != D-reg
 	void BNE(int breg, int dreg, int address) 
 	{
-		if(breg != dreg) 
-		{
-			if(dreg == 0) 
-				PC = EffAddress(breg, address);
-			else 
-				PC = address;
-		}
-		else 
-			;
+        if(registers[breg] != registers[dreg])
+            PC = address;
 	}
 	
 	//BEZ
 	//Branches to an address when content of B-reg = 0
 	void BEZ(int breg, int dreg, int address) 
 	{
-		if(breg == 0) 
-		{
-			if(dreg == 0) 
-				PC = EffAddress(breg, address);
-			else 
-				PC = address;
-		}
-		else 
-			;
+        if(registers[breg] == 0)
+            PC = address;
 	}
 	
 	//BNZ
 	//Branches to an address whne content of B-reg != 0
 	void BNZ(int breg, int dreg, int address) 
 	{
-		if(breg != 0)
-		{
-			if(dreg == 0) 
-				PC = EffAddress(breg, address);
-			else 
-				PC = address;
-		}
-		else
-			;
+        if(registers[breg] != 0)
+            PC = address;
 	}
 	
 	//BGZ
 	//Branches to an address when content of B-reg > 0
 	void BGZ(int breg, int dreg, int address) 
 	{
-		if(breg > 0)
-		{
-			if(dreg == 0) 
-				PC = EffAddress(breg, address);
-			else 
-				PC = address;
-		}
-		else
-			;
+        if(registers[breg] > 0)
+            PC = address;
 	}
 	
 	//BLZ
 	//Branches to an address when content of B-reg < 0
 	void BLZ(int breg, int dreg, int address) 
 	{
-		if(breg < 0) 
-		{
-			if(dreg == 0) 
-				PC = EffAddress(breg, address);
-			else 
-				PC = address;
-		}
-		else
-			;
+        if(registers[breg] < 0)
+            PC = address;
 	}
 	
 	//effective address
