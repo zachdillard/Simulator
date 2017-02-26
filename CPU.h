@@ -99,8 +99,10 @@ public:
         {
             case 0x0:
                 RD(reg1, reg2, address);
+                break;
             case 0x1:
                 WR(reg1, reg2, address);
+                break;
         }
     }
     void UnconditionalJump(string statement)
@@ -208,39 +210,39 @@ public:
     void RD(int reg1, int reg2, int address)
     {
         if(reg2 == 0)
-            registers[reg1] = mem->getRAM(address);
+            registers[reg1] = mem->getRAM(ramStart + address);
         else
-            registers[reg1] = mem->getRAM(registers[reg2]);
+            registers[reg1] = mem->getRAM(ramStart + registers[reg2]);
     }
 	//write 
 	//Writes the content of accumulator into O/P buffer
     void WR(int reg1, int reg2, int address)
 	{
 		if(reg2 == 0)
-            mem->setRAM(address, registers[reg1]);
+            mem->setRAM(ramStart + address, registers[reg1]);
         else
-            mem->setRAM(registers[reg2], registers[reg1]);
+            mem->setRAM(ramStart + registers[reg2], registers[reg1]);
 	}
 	
 	//store
 	//stores the content of a register into an address
 	void ST(int breg, int dreg, int address)
 	{
-        mem->setRAM(registers[dreg] + address, registers[breg]);
+        mem->setRAM(ramStart + registers[dreg] + address, registers[breg]);
 	}
 	
 	//load
 	//loads the content of an address into a register
 	void LW(int breg, int dreg, int address)
 	{
-        registers[dreg] = mem->getRAM(registers[breg] + address);
+        registers[dreg] = mem->getRAM(ramStart + registers[breg] + address);
 	}
 	
 	//move
 	//transfers the content of one register into another
 	void MOV(int sreg1, int sreg2, int dreg)
 	{
-        registers[dreg] = registers[sreg2];
+        registers[sreg1] = registers[sreg2];
 	}
 	
 	//add
@@ -290,7 +292,7 @@ public:
 		if(breg == 0)
             registers[dreg] = address;
 		else
-            registers[dreg] = mem->getRAM(registers[breg] + address);
+            registers[dreg] = mem->getRAM(ramStart + registers[breg] + address);
 	}
 	
 	//ADDI
@@ -300,7 +302,7 @@ public:
 		if(breg == 0)
             registers[dreg] += address;
 		else
-            registers[dreg] += mem->getRAM(registers[breg] + address);
+            registers[dreg] += mem->getRAM(ramStart + registers[breg] + address);
 	}
 	
 	//MULI
@@ -310,7 +312,7 @@ public:
         if(breg == 0)
             registers[dreg] *= address;
         else
-            registers[dreg] *= mem->getRAM(registers[breg] + address);
+            registers[dreg] *= mem->getRAM(ramStart + registers[breg] + address);
     }
 	
 	//DIVI
@@ -320,7 +322,7 @@ public:
         if(breg == 0)
             registers[dreg] /= address;
         else
-            registers[dreg] /= mem->getRAM(registers[breg] + address);
+            registers[dreg] /= mem->getRAM(ramStart + (registers[breg] + address));
 	}
 	
 	//LDI
@@ -330,7 +332,7 @@ public:
 		if(breg == 0)
             registers[dreg] = address;
         else
-            registers[dreg] = mem->getRAM(registers[breg] + address);
+            registers[dreg] = mem->getRAM(ramStart + (registers[breg] + address));
 	}
 	
 	//SLT
@@ -371,7 +373,7 @@ public:
 	//Jumps to a specified locaiton
 	void JMP(int address)
 	{
-		PC = mem->getRAM(address);
+		PC = mem->getRAM(ramStart + address);
 	}
 	
 	//BEQ
@@ -379,7 +381,7 @@ public:
 	void BEQ(int breg, int dreg, int address) 
 	{
 		if(registers[breg] == registers[dreg])
-            PC = address;
+            PC = ramStart + address;
 	}
 	
 	//BNE
@@ -387,7 +389,7 @@ public:
 	void BNE(int breg, int dreg, int address) 
 	{
         if(registers[breg] != registers[dreg])
-            PC = address;
+            PC = ramStart + address;
 	}
 	
 	//BEZ
@@ -395,7 +397,7 @@ public:
 	void BEZ(int breg, int dreg, int address) 
 	{
         if(registers[breg] == 0)
-            PC = address;
+            PC = ramStart + address;
 	}
 	
 	//BNZ
@@ -403,7 +405,7 @@ public:
 	void BNZ(int breg, int dreg, int address) 
 	{
         if(registers[breg] != 0)
-            PC = address;
+            PC = ramStart + address;
 	}
 	
 	//BGZ
@@ -411,7 +413,7 @@ public:
 	void BGZ(int breg, int dreg, int address) 
 	{
         if(registers[breg] > 0)
-            PC = address;
+            PC = ramStart + address;
 	}
 	
 	//BLZ
@@ -419,20 +421,26 @@ public:
 	void BLZ(int breg, int dreg, int address) 
 	{
         if(registers[breg] < 0)
-            PC = address;
+            PC = ramStart + address;
 	}
 	
 	//effective address
 	//takes int value and address
 	int EffAddress(int offset, int address) 
 	{
-		return offset + address;
+		return ramStart + offset + address;
 	}
+    
+    void setRamStart(int address)
+    {
+        ramStart = address;
+    }
      
     int PC; //Address or array index of the instruction in memory
     unsigned int registers[16];
 private:
     Memory* mem;
+    int ramStart;
 };
 
 
