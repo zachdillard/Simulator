@@ -5,6 +5,7 @@
 #include "Memory.h"
 #include "Loader.h"
 #include "CPU.h"
+#include "Clock.h"
 
 int main() {
     Memory memory;
@@ -23,9 +24,12 @@ int main() {
         {
             cpu.setRamStart(memory.pcbs[shortTerm.ready_queue.front()]->ramStart);
             shortTerm.dispatch(&memory, &cpu);
-            
+            Clock runClock;
+			runclock.c = clock();
             do cpu.decoder(cpu.fetch());
             while(cpu.PC != 0);
+			float runTimeEnd = clock() - runClock.c;
+			memory.pcbs[ready_queue.front()]->runTime = runTimeEnd;
             
             //Change the location of file path
         }
