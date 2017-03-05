@@ -5,7 +5,6 @@
 #include "Memory.h"
 #include "CPU.h"
 #include "ShortTerm.h"
-#include "Clock.h"
 
 class LongTerm {
 public:
@@ -49,19 +48,27 @@ public:
     };
     void setNextRamStart(int index) {nextRAMStart = index;}
     int getProcessCount() {return processCount;}
-	Clock waitClock;
 private:
     Memory* mem;
     ShortTerm* ss;
     int processCount;
     int nextRAMStart;
+
     void addToQueue()
     {
-		waitClock.c = clock();
-		memory->pcbs[processCount]->waitTime = waitClock.c;
-        ss->ready_queue.push(processCount);
+        sort_queue.push_back(mem->pcbs[processCount]);
         ++processCount;
     };
+    vector<PCB*> sort_queue;
+    bool compareByPriority(const PCB &a, const PCB &b)
+    {
+        return a.priority < b.priority;
+    }
+    /*void sortQueue()
+    {
+        std::sort(sort_queue.begin(), sort_queue.end(), compareByPriority);
+    }*/
+   
 };
 
 #endif //PROJECT_LONGTERM_H

@@ -2,9 +2,9 @@
 #define PROJECT_SHORTTERM_H
 
 #include <queue>
-#include "Clock.h"
 #include "CPU.h"
 #include "Memory.h"
+#include "PriorityQueue.h"
 
 class ShortTerm {
 //Get top value of ready_queue
@@ -13,18 +13,15 @@ class ShortTerm {
     //Put that value into the PC of the CPU
 public:
     ShortTerm() {};
-	float endWaitTime;      //New
-	Clock waitClock;        //New
     std::queue<int> ready_queue;
+    //PriorityQueue ready_queue;
     void dispatch(Memory* memory, CPU* cpu)
     {
-        cpu->PC = memory->pcbs[ready_queue.front()]->pc;
-		waitClock.c = memory->pcbs[ready_queue.front()]->waitTime;  //New
-		endWaitTime = clock()-waitClock.c;                          //New
-		memory->pcbs[ready_queue.front()]->waitTime;                //New
+        cpu->setRamStart(memory->pcbs[ready_queue.front()]->ramStart);
+        cpu->setProcessLength(memory->pcbs[ready_queue.front()]->processLength);
         ready_queue.pop();
-		
     };
+private:
+    Memory* memory;
 };
-
 #endif //PROJECT_SHORTTERM_H

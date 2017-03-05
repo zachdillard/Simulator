@@ -18,8 +18,6 @@ struct PCB {
     int buff_temp = 0;  //size of temporary buffer
     int processLength = 0; //Total size of process including data/buffers
     int cpuID = 0;
-	float waitTime = 0;
-	float runTime = 0;
 };
 
 class Memory 
