@@ -62,7 +62,7 @@ public:
         file.open("/Users/zachdillard/School/OperatingSystems/Simulator/Simulator/coredump.txt", std::ios_base::app);
         for(std::size_t i = 0; i < 4096; i+=4)
         {
-            file << "Addr: 0x" << std::hex << i << "\t" << ram[i]<< "\n";
+            file << "Address: 0x" << std::hex << i << "\t" << ram[i]<< "\n";
         }
         file.close();
     }

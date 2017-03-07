@@ -443,21 +443,34 @@ public:
         processLength = length;
     }
     
-    void clearCache()
+    void clearCPU()
     {
         for(int i = 0; i < processLength * 4; ++i)
             cache[i] = 0;
+        processID = 0;
+        ramStart = 0;
+        processLength = 0;
+        PC = 0;
+    }
+    void setProcessID(int ID)
+    {
+        processID = ID;
+    }
+    int getProcessID()
+    {
+        return ID;
     }
      
     int PC; //Address or array index of the instruction in memory
     unsigned int registers[16];
     unsigned int cache[400];
     bool running;
+    int ramStart;
 private:
     Memory* mem;
-    int ramStart;
     int processLength;
     int ID;
+    int processID;
 };
 
 

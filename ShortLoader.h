@@ -21,12 +21,12 @@ public:
     void toCPU(CPU* cpu)
     {
         for(int i = 0; i < processLength * 4; i += 4)
-            cpu->cache[i] = memory->getRAM(ramStart + i);
+            cpu->cache[i] = memory->getRAM(cpu->ramStart + i);
     }
     void toRAM(CPU* cpu)
     {
         for(int i = 0; i < processLength * 4; i += 4)
-            memory->setRAM(ramStart + i, cpu->cache[i]);
+            memory->setRAM(cpu->ramStart + i, cpu->cache[i]);
     }
 private:
     Memory* memory;
