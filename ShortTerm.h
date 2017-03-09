@@ -19,7 +19,6 @@ public:
     {
         cpu->setRamStart(memory->pcbs[ready_queue.front()]->ramStart);
         cpu->setProcessLength(memory->pcbs[ready_queue.front()]->processLength);
-        cpu->setProcessID(memory->pcbs[ready_queue.front()]->id);
         ready_queue.pop();
     };
 private:

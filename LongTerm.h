@@ -53,23 +53,11 @@ private:
     ShortTerm* ss;
     int processCount;
     int nextRAMStart;
-
     void addToQueue()
     {
         ss->ready_queue.push(processCount);
         ++processCount;
     };
-    /*vector<PCB*> sort_queue;
-    bool compareByPriority(const PCB *a, const PCB *b)
-    {
-        return a->priority < b->priority;
-    }
-    void sortQueue()
-    {
-        sort_queue.push_back(mem->pcbs[processCount]);
-        std::sort(sort_queue.begin(), sort_queue.end(), compareByPriority);
-    }*/
-   
 };
 
 #endif //PROJECT_LONGTERM_H
