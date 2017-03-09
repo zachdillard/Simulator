@@ -14,7 +14,6 @@ class ShortTerm {
 public:
     ShortTerm() {};
     std::queue<int> ready_queue;
-    //PriorityQueue ready_queue;
     void dispatch(Memory* memory, CPU* cpu)
     {
         cpu->setRamStart(memory->pcbs[ready_queue.front()]->ramStart);

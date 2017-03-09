@@ -15,7 +15,6 @@ public:
     }
     void setLengths()
     {
-        ramStart = memory->pcbs[shortTerm->ready_queue.front()]->ramStart;
         processLength = memory->pcbs[shortTerm->ready_queue.front()]->processLength;
     }
     void toCPU(CPU* cpu)
@@ -31,7 +30,6 @@ public:
 private:
     Memory* memory;
     ShortTerm* shortTerm;
-    int ramStart;
     int processLength;
 };
 

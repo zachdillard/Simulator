@@ -5,7 +5,7 @@
 
 class Clock{
 public:
-	clock_t c;
+    clock_t c;
 };
 
 

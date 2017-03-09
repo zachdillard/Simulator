@@ -48,6 +48,22 @@ public:
     };
     void setNextRamStart(int index) {nextRAMStart = index;}
     int getProcessCount() {return processCount;}
+    vector<PCB*> sort_queue;
+    void sortList()
+    {
+        int j;
+        PCB* temp;
+        for (int i = 0; i < sort_queue.size(); i++){
+            j = i;
+            
+            while (j > 0 && sort_queue[j]->priority < sort_queue[j-1]->priority){
+                temp = sort_queue[j];
+                sort_queue[j] = sort_queue[j-1];
+                sort_queue[j-1] = temp;
+                j--;
+            }
+        }
+    }
 private:
     Memory* mem;
     ShortTerm* ss;
@@ -56,20 +72,9 @@ private:
 
     void addToQueue()
     {
-        ss->ready_queue.push(processCount);
+        sort_queue.push_back(mem->pcbs[processCount]);
         ++processCount;
     };
-    /*vector<PCB*> sort_queue;
-    bool compareByPriority(const PCB *a, const PCB *b)
-    {
-        return a->priority < b->priority;
-    }
-    void sortQueue()
-    {
-        sort_queue.push_back(mem->pcbs[processCount]);
-        std::sort(sort_queue.begin(), sort_queue.end(), compareByPriority);
-    }*/
-   
 };
 
 #endif //PROJECT_LONGTERM_H

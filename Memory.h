@@ -3,7 +3,10 @@
 
 #include <string>
 #include <iostream>
+#include <iomanip>
 #include <fstream>
+
+#define fhex(_v) std::setw(_v) << std::hex << std::setfill('0')
 
 struct PCB {
     int id = 0;         //process ID
@@ -60,15 +63,17 @@ public:
         //DONT USE CAUSES MEMORY LEAKS
         std::ofstream file;
         file.open("/Users/zachdillard/School/OperatingSystems/Simulator/Simulator/coredump.txt", std::ios_base::app);
+        file << "Address\t\tValue\n" << "----------------------\n";
         for(std::size_t i = 0; i < 4096; i+=4)
         {
-            file << "Address: 0x" << std::hex << i << "\t" << ram[i]<< "\n";
+            file << "0x" << fhex(8) << i << ":\t" << "0x" << fhex(8) << ram[i]<< "\n";
         }
+        file << "\n";
         file.close();
     }
     void clearRam()
     {
-        for(std::size_t i = 0; i < 1024; ++i)
+        for(std::size_t i = 0; i < 4096; ++i)
             ram[i] = 0;
         ramCount = 0;
     }

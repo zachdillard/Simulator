@@ -6,14 +6,15 @@
 #include "Loader.h"
 #include "CPU.h"
 #include "ShortLoader.h"
+#include "Clock.h"
 
 int main() {
     Memory memory;
     Loader loader;
-    CPU* cpus[4];
-    for(int i = 0; i < 4; ++i)
+    int cpuCount = 4;
+    CPU* cpus[cpuCount];
+    for(int i = 0; i < cpuCount; ++i)
         cpus[i] = new CPU(&memory);
-    //CPU cpu(&memory);
     ShortTerm shortTerm;
     ShortLoader shortLoader(&memory, &shortTerm);
     //Change this to the absolute location of where you're storing the program file
@@ -24,11 +25,12 @@ int main() {
         longTerm.setNextRamStart(0);
         while(longTerm.getProcessCount() <= memory.JobCount && longTerm.getProcessLength() < memory.ramSpaceLeft())
             longTerm.addToRam();
+        //longTerm.sortList();
+        for(int i = 0; i < longTerm.sort_queue.size(); ++i)
+            shortTerm.ready_queue.push(longTerm.sort_queue[i]->id);
         while(shortTerm.ready_queue.size() > 0 || cpus[0]->running || cpus[1]->running || cpus[2]->running || cpus[3]->running)
         {
-            //Instead of for loop just use an if statement and check each cpu every turn
-            //Should cut down on idle
-            for(int i = 0; i < 4; ++i)
+            for(int i = 0; i < cpuCount; ++i)
             {
                 if(cpus[i]->running == false && shortTerm.ready_queue.size() != 0)
                 {
@@ -41,7 +43,7 @@ int main() {
                 }
                 else
                 {
-                    if(cpus[i]->running == true || shortTerm.ready_queue.size() != 0) //Courtesy of Will
+                    if(cpus[i]->running || shortTerm.ready_queue.size() != 0) //Courtesy of Will
                     {
                         cpus[i]->decoder(cpus[i]->fetch());
                         if(cpus[i]->running == false)
@@ -55,6 +57,7 @@ int main() {
         }
         memory.coreDump();
         memory.clearRam();
+        longTerm.sort_queue.clear();
     }
     return 0;
 }
