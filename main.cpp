@@ -6,7 +6,6 @@
 #include "Loader.h"
 #include "CPU.h"
 #include "ShortLoader.h"
-#include "Clock.h"
 #include <time.h>
 
 

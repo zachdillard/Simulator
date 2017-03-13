@@ -6,7 +6,6 @@
 #include "CPU.h"
 #include "ShortTerm.h"
 #include "PriorityQueue.h"
-#include "heap.h"
 
 class LongTerm {
 public:
