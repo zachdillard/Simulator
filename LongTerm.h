@@ -5,6 +5,8 @@
 #include "Memory.h"
 #include "CPU.h"
 #include "ShortTerm.h"
+#include "PriorityQueue.h"
+#include "heap.h"
 
 class LongTerm {
 public:
@@ -48,7 +50,7 @@ public:
     };
     void setNextRamStart(int index) {nextRAMStart = index;}
     int getProcessCount() {return processCount;}
-    vector<PCB*> sort_queue;
+    /*vector<PCB*> sort_queue;
     void sortList()
     {
         int j;
@@ -63,7 +65,7 @@ public:
                 j--;
             }
         }
-    }
+    }*/
 private:
     Memory* mem;
     ShortTerm* ss;
@@ -72,7 +74,9 @@ private:
 
     void addToQueue()
     {
-        sort_queue.push_back(mem->pcbs[processCount]);
+        //sort_queue.push_back(mem->pcbs[processCount]);
+        ss->ready_queue.push(mem->pcbs[processCount]);
+        mem->pcbs[processCount]->waitingClock = clock();
         ++processCount;
     };
 };

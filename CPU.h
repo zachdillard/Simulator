@@ -95,6 +95,7 @@ public:
         reg2 = stoul(statement.substr(12, 4), nullptr, 2);
         address = stoul(statement.substr(16, 16), nullptr, 2);
         
+        mem->pcbs[processID]->operations++;
         
         switch(opcode)
         {
@@ -458,14 +459,30 @@ public:
     }
     int getProcessID()
     {
-        return ID;
+        return processID;
+    }
+    
+    int getNumberOfJobs()
+    {
+        return jobs.size();
+    }
+    
+    double percentOfJobs()
+    {
+        return (double) getNumberOfJobs() / 30.0;
+    }
+    
+    double percentCacheUsed()
+    {
+        return (double) processLength / 100.0;
     }
      
-    int PC; //Address or array index of the instruction in memory
+    int PC; 
     unsigned int registers[16];
     unsigned int cache[400];
     bool running;
     int ramStart;
+    vector<int> jobs;
 private:
     Memory* mem;
     int processLength;

@@ -7,11 +7,13 @@
 #include "CPU.h"
 #include "ShortLoader.h"
 #include "Clock.h"
+#include <time.h>
+
 
 int main() {
     Memory memory;
     Loader loader;
-    int cpuCount = 4;
+    int const cpuCount = 4;
     CPU* cpus[cpuCount];
     for(int i = 0; i < cpuCount; ++i)
         cpus[i] = new CPU(&memory);
@@ -25,9 +27,12 @@ int main() {
         longTerm.setNextRamStart(0);
         while(longTerm.getProcessCount() <= memory.JobCount && longTerm.getProcessLength() < memory.ramSpaceLeft())
             longTerm.addToRam();
-        //longTerm.sortList();
+        /*longTerm.sortList();
         for(int i = 0; i < longTerm.sort_queue.size(); ++i)
+        {
             shortTerm.ready_queue.push(longTerm.sort_queue[i]->id);
+            longTerm.sort_queue[i]->waitingClock = clock();
+        }*/
         while(shortTerm.ready_queue.size() > 0 || cpus[0]->running || cpus[1]->running || cpus[2]->running || cpus[3]->running)
         {
             for(int i = 0; i < cpuCount; ++i)
@@ -38,6 +43,9 @@ int main() {
                     memory.pcbs[shortTerm.ready_queue.front()]->cpuID = i;
                     shortLoader.setLengths();
                     shortLoader.toCPU(cpus[i]);
+                    memory.pcbs[shortTerm.ready_queue.front()]->waitingClock = clock() - memory.pcbs[shortTerm.ready_queue.front()]->waitingClock;
+                    memory.pcbs[shortTerm.ready_queue.front()]->waitingTime = ((double) memory.pcbs[shortTerm.ready_queue.front()]->waitingClock) / CLOCKS_PER_SEC;
+                    memory.pcbs[shortTerm.ready_queue.front()]->runningClock = clock();
                     shortTerm.dispatch(&memory, cpus[i]);
                     cpus[i]->running = true;
                 }
@@ -48,6 +56,9 @@ int main() {
                         cpus[i]->decoder(cpus[i]->fetch());
                         if(cpus[i]->running == false)
                         {
+                            //Stop running time for processes
+                            memory.pcbs[cpus[i]->getProcessID()]->runningClock = clock() - memory.pcbs[cpus[i]->getProcessID()]->runningClock;
+                            memory.pcbs[cpus[i]->getProcessID()]->runningTime = ((double) memory.pcbs[cpus[i]->getProcessID()]->runningClock) / CLOCKS_PER_SEC;
                             shortLoader.toRAM(cpus[i]);
                             cpus[i]->clearCPU();
                         }
@@ -55,28 +66,10 @@ int main() {
                 }
             }
         }
+        memory.percentRAM.push_back(memory.percentRAMUsed());
         memory.coreDump();
         memory.clearRam();
-        longTerm.sort_queue.clear();
+        //longTerm.sort_queue.clear();
     }
     return 0;
 }
-
-
-
-/*
- 
- cpu.setRamStart(memory.pcbs[shortTerm.ready_queue.front()]->ramStart);
- shortLoader.setLengths();
- shortLoader.toCPU(&cpu);
- shortTerm.dispatch(&memory, &cpu);
- 
- 
- do cpu.decoder(cpu.fetch());
- while(cpu.PC != 0);
- 
- 
- shortLoader.toRAM(&cpu);
- cpu.clearCache();
- 
- */

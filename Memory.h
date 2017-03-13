@@ -5,6 +5,8 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+#include <vector>
+#include <time.h>
 
 #define fhex(_v) std::setw(_v) << std::hex << std::setfill('0')
 
@@ -21,6 +23,12 @@ struct PCB {
     int buff_temp = 0;  //size of temporary buffer
     int processLength = 0; //Total size of process including data/buffers
     int cpuID = 0;
+    clock_t waitingClock;
+    clock_t runningClock;
+    double waitingTime = 0;
+    double runningTime = 0;
+    int operations = 0;
+    double percentCache = 0;
 };
 
 class Memory 
@@ -34,6 +42,7 @@ public:
 	PCB* pcbs[40];
     int ramCount = 0;
     int JobCount = 0;
+    std::vector<double> percentRAM;
 	void setRAM(int address, unsigned int value)
     {
         ram[address] = value;
@@ -57,6 +66,10 @@ public:
     int ramSpaceLeft()
     {
         return 4096 - ramCount;
+    }
+    double percentRAMUsed()
+    {
+        return (double) ramSpaceUsed() / 4096.0;
     }
     void coreDump()
     {
