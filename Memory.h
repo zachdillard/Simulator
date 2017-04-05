@@ -75,7 +75,7 @@ public:
     {
         //DONT USE CAUSES MEMORY LEAKS
         std::ofstream file;
-        file.open("/Users/zachdillard/School/OperatingSystems/Simulator/Simulator/coredump.txt", std::ios_base::app);
+        file.open("/Users/zachdillard/School/OperatingSystems/Simulator/Simulator/coredump.txt", std::ios_base::app | std::ofstream::trunc);
         file << "Address\t\tValue\n" << "----------------------\n";
         for(std::size_t i = 0; i < 4096; i+=4)
         {
