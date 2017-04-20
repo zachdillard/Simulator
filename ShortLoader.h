@@ -17,14 +17,19 @@ public:
     {
         processLength = memory->pcbs[shortTerm->ready_queue.front()]->processLength;
     }
-    void toCPU(CPU* cpu)
+    void fillCache(Memory* m, ShortTerm* s)
+    {
+        for(int i = 0; i < processLength * 4; i += 4)
+            m->pcbs[s->ready_queue.front()]->cache[i] = m->getRAM(m->pcbs[s->ready_queue.front()]->ramStart + i);
+    }
+    void toCPU(CPU* cpu, Memory* m)
     {
         for(int i = 0; i < processLength * 4; i += 4)
             cpu->cache[i] = memory->getRAM(cpu->ramStart + i);
     }
     void toRAM(CPU* cpu)
     {
-        for(int i = 0; i < processLength * 4; i += 4)
+        for(int i = 0; i < cpu->processLength * 4; i += 4)
             memory->setRAM(cpu->ramStart + i, cpu->cache[i]);
     }
 private:

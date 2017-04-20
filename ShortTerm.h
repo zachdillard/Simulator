@@ -15,15 +15,31 @@ public:
     ShortTerm() {};
     //std::queue<int> ready_queue;
     PriorityQueue ready_queue;
+    std::queue<int> waiting_queue;
     void dispatch(Memory* memory, CPU* cpu)
     {
-        cpu->setRamStart(memory->pcbs[ready_queue.front()]->ramStart);
-        cpu->setProcessLength(memory->pcbs[ready_queue.front()]->processLength);
-        cpu->setProcessID(memory->pcbs[ready_queue.front()]->id);
-        memory->pcbs[ready_queue.front()]->percentCache = cpu->percentCacheUsed();
-        cpu->jobs.push_back(memory->pcbs[ready_queue.front()]->id);
+        int pid = ready_queue.front();
+        cpu->setRamStart(memory->pcbs[pid]->ramStart);
+        cpu->setProcessLength(memory->pcbs[pid]->processLength);
+        cpu->setProcessID(pid);
+        memcpy(cpu->registers, memory->pcbs[pid]->registers, sizeof(cpu->registers));
+        memcpy(cpu->cache, memory->pcbs[pid]->cache, sizeof(cpu->cache));
+        cpu->PC = memory->pcbs[pid]->csPC;
+        memory->pcbs[pid]->status = "running";
+        memory->pcbs[pid]->percentCache = cpu->percentCacheUsed();
+        cpu->jobs.push_back(pid);
         ready_queue.pop();
     };
+    void contextSwitch(Memory* memory, CPU* cpu)
+    {
+        int pid = cpu->getProcessID();
+        memcpy(memory->pcbs[pid]->registers, cpu->registers, sizeof(cpu->registers));
+        memcpy(memory->pcbs[pid]->cache, cpu->cache, sizeof(cpu->cache));
+        memory->pcbs[pid]->csPC = cpu->PC;
+        memory->pcbs[pid]->status = "waiting";
+        cpu->running = false;
+        waiting_queue.push(pid);
+    }
 private:
     Memory* memory;
 };

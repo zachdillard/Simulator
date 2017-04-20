@@ -23,7 +23,7 @@ public:
     //DECODE
     //Read each bit to figure out if I/O instruction or Compute
     //Figure out the opcode
-    void decoder(unsigned int memValue){
+    void decode(unsigned int memValue){
         //Converts hex input to binary
         bitset<32> ourValue(memValue);
         string decodedValue = ourValue.to_string();
@@ -106,6 +106,8 @@ public:
                 WR(reg1, reg2, address);
                 break;
         }
+        
+        mem->pcbs[getProcessID()]->ioGranted = false;
     }
     void UnconditionalJump(string statement)
     {
@@ -446,8 +448,10 @@ public:
     
     void clearCPU()
     {
-        for(int i = 0; i < processLength * 4; ++i)
+        for(int i = 0; i < 400; ++i)
             cache[i] = 0;
+        for(int i = 0; i < 16; ++i)
+            registers[i] = 0;
         processID = 0;
         ramStart = 0;
         processLength = 0;
@@ -476,16 +480,16 @@ public:
     {
         return (double) processLength / 100.0;
     }
-     
+    
     int PC; 
     unsigned int registers[16];
     unsigned int cache[400];
     bool running;
     int ramStart;
     vector<int> jobs;
+    int processLength;
 private:
     Memory* mem;
-    int processLength;
     int ID;
     int processID;
 };
