@@ -5,7 +5,7 @@
 #include "CPU.h"
 #include "Memory.h"
 #include "PriorityQueue.h"
-
+#include <time.h>
 class ShortTerm {
 //Get top value of ready_queue
     //Thats the PID
@@ -15,7 +15,8 @@ public:
     ShortTerm() {};
     //std::queue<int> ready_queue;
     PriorityQueue ready_queue;
-    std::queue<int> waiting_queue;
+    std::queue<int> io_waiting_queue;
+    std::queue<int> page_waiting_queue;
     void dispatch(Memory* memory, CPU* cpu)
     {
         int pid = ready_queue.front();
@@ -30,15 +31,29 @@ public:
         cpu->jobs.push_back(pid);
         ready_queue.pop();
     };
-    void contextSwitch(Memory* memory, CPU* cpu)
+    void ioContextSwitch(Memory* memory, CPU* cpu)
     {
         int pid = cpu->getProcessID();
         memcpy(memory->pcbs[pid]->registers, cpu->registers, sizeof(cpu->registers));
         memcpy(memory->pcbs[pid]->cache, cpu->cache, sizeof(cpu->cache));
         memory->pcbs[pid]->csPC = cpu->PC;
         memory->pcbs[pid]->status = "waiting";
+        memory->pcbs[pid]->ioRequests++;
+        memory->pcbs[pid]->waitingClock = clock();
         cpu->running = false;
-        waiting_queue.push(pid);
+        io_waiting_queue.push(pid);
+    }
+    void pageContextSwitch(Memory* memory, CPU* cpu)
+    {
+        int pid = cpu->getProcessID();
+        memcpy(memory->pcbs[pid]->registers, cpu->registers, sizeof(cpu->registers));
+        memcpy(memory->pcbs[pid]->cache, cpu->cache, sizeof(cpu->cache));
+        memory->pcbs[pid]->csPC = cpu->PC;
+        memory->pcbs[pid]->status = "waiting";
+        memory->pcbs[pid]->pageFaultCount++;
+        memory->pcbs[pid]->waitingClock = clock();
+        cpu->running = false;
+        page_waiting_queue.push(pid);
     }
 private:
     Memory* memory;

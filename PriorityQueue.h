@@ -88,4 +88,4 @@ private:
     }
 };
 
-#endif /* PriorityQueue_hpp */
+#endif /* idQueue_hpp */

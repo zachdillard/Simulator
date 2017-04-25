@@ -4,6 +4,7 @@
 #include "Memory.h"
 #include <bitset>
 #include <sstream>
+#include <unordered_set>
 
 
 using namespace std;
@@ -14,7 +15,7 @@ public:
     //FETCH
     //Go to the PC and get its value, this is the address of the instruction
     //Go to that address and retrieve the value
-    //Update PC by 1
+    //Update PC by 4
     unsigned int fetch(){
         unsigned int memValue = cache[PC];
         PC += 4;
@@ -466,14 +467,10 @@ public:
         return processID;
     }
     
-    int getNumberOfJobs()
-    {
-        return jobs.size();
-    }
-    
     double percentOfJobs()
     {
-        return (double) getNumberOfJobs() / 30.0;
+        getTotalJobs();
+        return (double) s.size() / 30.0;
     }
     
     double percentCacheUsed()
@@ -481,7 +478,13 @@ public:
         return (double) processLength / 100.0;
     }
     
-    int PC; 
+    void getTotalJobs()
+    {
+        for(int i = 0; i < jobs.size(); i++)
+            s.insert(jobs[i]);
+    }
+    
+    unsigned int PC;
     unsigned int registers[16];
     unsigned int cache[400];
     bool running;
@@ -492,6 +495,7 @@ private:
     Memory* mem;
     int ID;
     int processID;
+    std::unordered_set<int> s;
 };
 
 

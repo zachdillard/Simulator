@@ -10,6 +10,11 @@
 
 #define fhex(_v) std::setw(_v) << std::hex << std::setfill('0')
 
+struct page {
+    unsigned int frame = 0;
+    bool valid = false;
+};
+
 struct PCB {
     int id = 0;         //process ID
     int size = 0;   //Number of instructions
@@ -24,6 +29,9 @@ struct PCB {
     int processLength = 0; //Total size of process including data/buffers
     clock_t waitingClock;
     clock_t runningClock;
+    clock_t contextSwitchClock = 0;
+    int totalWaitingCycles = 0;
+    int totalRunningCycles = 0;
     double waitingTime = 0;
     double runningTime = 0;
     int operations = 0;
@@ -34,7 +42,10 @@ struct PCB {
     unsigned int cache[400] = {0};
     unsigned int csPC = 0;
     int cpuID = 0;
-    int pagetable[20]; // -1 represents invalid bit, any other number is a valid bit + its frame number
+    int currentPage = 0;
+    page pagetable[30];
+    int pageFaultCount = 0;
+    int ioRequests = 0;
 };
 
 class Memory
@@ -79,7 +90,6 @@ public:
     }
     void coreDump()
     {
-        //DONT USE CAUSES MEMORY LEAKS
         std::ofstream file;
         file.open("/Users/zachdillard/School/OperatingSystems/Simulator/Simulator/coredump.txt", std::ios_base::app);
         file << "Address\t\tValue\n" << "----------------------\n";
@@ -93,15 +103,15 @@ public:
     
     void printTimes()
     {
-        printf("Stats for processes\n");
         for(int i = 1; i <= 30; ++i)
         {
-            printf("Process %i\n", i);
-            std::cout << "Waiting time: " << std::setprecision (10) << pcbs[i]->waitingTime * 1000 << std::endl;
-            std::cout << "Running time: " << std::setprecision (10) << pcbs[i]->runningTime * 1000 << std::endl;
-            printf("IO operations: %i\n", pcbs[i]->operations);
-            printf("Percent cache used: %f\n", pcbs[i]->percentCache);
-            printf("Percent RAM used: %f\n", pcbs[i]->processLength / 1024.0);
+            printf("%i", i);
+            std::cout << "," << std::setprecision (10) << pcbs[i]->waitingTime * 1000;
+            std::cout << "," << std::setprecision (10) << pcbs[i]->runningTime * 1000;
+            printf(",%i", pcbs[i]->operations);
+            printf(",%i", pcbs[i]->pageFaultCount);
+            printf(",%f", pcbs[i]->percentCache);
+            printf(",%f", pcbs[i]->processLength / 1024.0);
             printf("\n");
         }
     }

@@ -11,7 +11,6 @@
 class Loader
 {
 public:
-	//methods
     Loader(){}
 	void readFromFile(std::string filename, Memory *memory)
     {

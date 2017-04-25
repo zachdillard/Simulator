@@ -6,14 +6,16 @@
 #include "CPU.h"
 #include "ShortTerm.h"
 #include "PriorityQueue.h"
+#include "MMU.h"
 
 class LongTerm {
 public:
-    LongTerm(Memory *memory, ShortTerm *shortTerm)
+    LongTerm(Memory *memory, ShortTerm *shortTerm, MMU* mm)
     {
         mem = memory;
         ss = shortTerm;
         processCount = 1;
+        mmu = mm;
     };
     int getCurrentPID()
     {
@@ -45,6 +47,12 @@ public:
             mem->ramCount += 4;
         }
         nextRAMStart = getCurrentProcess()->ramStart + (getProcessLength() * 4);
+        for(int i = 0; i < 4; ++i)
+        {
+            getCurrentProcess()->pagetable[i].frame = mmu->frame_list.front();
+            getCurrentProcess()->pagetable[i].valid = true;
+            mmu->frame_list.pop();
+        }
         addToQueue();
     };
     void setNextRamStart(int index) {nextRAMStart = index;}
@@ -53,6 +61,7 @@ public:
 private:
     Memory* mem;
     ShortTerm* ss;
+    MMU* mmu;
     int processCount;
     int nextRAMStart;
 

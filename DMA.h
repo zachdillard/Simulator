@@ -15,9 +15,9 @@ public:
     }
     void service()
     {
-        int pid = shortTerm->waiting_queue.front();
+        int pid = shortTerm->io_waiting_queue.front();
         memory->pcbs[pid]->ioGranted = true;
-        shortTerm->waiting_queue.pop();
+        shortTerm->io_waiting_queue.pop();
         shortTerm->ready_queue.push(memory->pcbs[pid]);
     }
 private:
